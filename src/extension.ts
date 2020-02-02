@@ -1,27 +1,41 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	let disposable = vscode.commands.registerCommand('extension.insertChangelog', async () => {
+		const currentDocument = vscode.window.activeTextEditor;
+		
+		if (!currentDocument) {
+			return;
+		}
+		
+		const snippet = new vscode.SnippetString("* ${CURRENT_DAY_NAME_SHORT} ${CURRENT_MONTH_NAME_SHORT} ${CURRENT_DATE} ${CURRENT_YEAR}");
+		
+		const name = await new Promise(resolve => {
+			cp.exec("git config user.name", (error, stdout, stderr) => {
+				resolve(stdout.trim());
+			});
+		})
+		const email = await new Promise(resolve => {
+			cp.exec("git config user.email", (error, stdout, stderr) => {
+				resolve(stdout.trim());
+			});
+		})
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "rpm-spec-changelog" is now active!');
+		if (name || email) {
+			snippet.appendText(` ${name} <${email}>`);
+		}
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+		const text = currentDocument.document.getText();
+		const version = text.match(/Version:(.*)/);
+		const release = text.match(/Release:(.*)/);
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
+		if (version && version[1] && release && release[1]) {
+			snippet.appendText(` - ${version[1].trim()}-${release[1].trim()}`);
+		}
+
+		currentDocument.insertSnippet(snippet);
 	});
 
 	context.subscriptions.push(disposable);
 }
-
-// this method is called when your extension is deactivated
-export function deactivate() {}
