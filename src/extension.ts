@@ -15,25 +15,46 @@ export function activate(context: vscode.ExtensionContext) {
 			cp.exec("git config user.name", (error, stdout, stderr) => {
 				resolve(stdout.trim());
 			});
-		})
+		});
 		const email = await new Promise(resolve => {
 			cp.exec("git config user.email", (error, stdout, stderr) => {
 				resolve(stdout.trim());
 			});
-		})
+		});
 
 		if (name || email) {
 			snippet.appendText(` ${name} <${email}>`);
 		}
 
 		const text = currentDocument.document.getText();
-		const version = text.match(/Version:(.*)/);
-		const release = text.match(/Release:(.*)/);
+		const foundVersion = text.match(/Version:(.*)/);
+		const foundRelease = text.match(/Release:(.*)/);
 
-		if (version && version[1] && release && release[1]) {
-			snippet.appendText(` - ${version[1].trim()}-${release[1].trim()}`);
+		if (foundVersion && foundRelease) {
+			const macroRegex = /%{[^}]+}/g;
+			let version = foundVersion[1].trim();
+			let release = foundRelease[1].trim();
+
+			// If macros are found evaluate
+			if (version.match(macroRegex) || release.match(macroRegex)) {
+				version = await new Promise(resolve => {
+					cp.exec(`rpm -E "${version}"`, (error, stdout, stderr) => {
+						resolve(stdout.trim());
+					});
+				});
+				release = await new Promise(resolve => {
+					cp.exec(`rpm -E ${release}`, (error, stdout, stderr) => {
+						resolve(stdout.trim());
+					});
+				});
+			}
+
+			snippet.appendText(` - ${version}-${release}`);
 		}
 
+		snippet.appendText("\n- ");
+		snippet.appendTabstop();
+		snippet.appendText("\n");
 		currentDocument.insertSnippet(snippet);
 	});
 
