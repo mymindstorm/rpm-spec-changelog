@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 import * as cp from "child_process";
 
 export function activate(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerCommand(
-    "extension.insertChangelog",
+  let disposable = vscode.commands.registerTextEditorCommand(
+    "extension.insertRPMSpecChangelog",
     async () => {
       const currentDocument = vscode.window.activeTextEditor;
 

@@ -19,13 +19,13 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.insertChangelog"
+		"onCommand:extension.insertRPMSpecChangelog"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.insertChangelog",
+				"command": "extension.insertRPMSpecChangelog",
 				"title": "RPM: Insert Changelog"
 			}
 		]
