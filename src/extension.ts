@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
         let release = foundRelease[1].trim();
 
         // If macros are found evaluate
-        if (version.match(macroRegex) || release.match(macroRegex)) {
+        if (macroRegex.test(version) || macroRegex.test(release)) {
           version = await new Promise(resolve => {
             cp.exec(`rpm -E "${version}"`, (error, stdout, stderr) => {
               resolve(stdout.trim());
