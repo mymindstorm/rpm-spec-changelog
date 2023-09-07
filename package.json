@@ -1,25 +1,23 @@
 {
-	"name": "rpm-spec-changelog",
+	"name": "rpmspec-changelog",
 	"displayName": "RPM Spec Changelog",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you.",
-	"version": "1.0.0",
-	"publisher": "mymindstorm",
+	"version": "1.1.0",
+	"publisher": "Adadov",
+  "license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/mymindstorm/rpm-spec-changelog.git"
+		"url": "https://github.com/Adadov/rpmspec-changelog.git"
 	},
 	"bugs": {
-		"url": "https://github.com/mymindstorm/rpm-spec-changelog/issues"
+		"url": "https://github.com/Adadov/rpmspec-changelog/issues"
 	},
 	"engines": {
-		"vscode": "^1.41.0"
+		"vscode": "^1.82.0"
 	},
 	"categories": [
 		"Snippets",
 		"Other"
-	],
-	"activationEvents": [
-		"onCommand:extension.insertRPMSpecChangelog"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -40,13 +38,12 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/node": "^12.11.7",
-		"@types/vscode": "^1.41.0",
-		"eslint": "^6.8.0",
-		"@typescript-eslint/parser": "^2.18.0",
+		"@types/vscode": "^1.82.0",
 		"@typescript-eslint/eslint-plugin": "^2.18.0",
+		"@typescript-eslint/parser": "^2.18.0",
+		"eslint": "^6.8.0",
 		"glob": "^7.1.6",
-		"mocha": "^7.0.1",
-		"typescript": "^3.7.5",
+		"typescript": "^5.2.2",
 		"vscode-test": "^1.3.0"
 	}
 }
