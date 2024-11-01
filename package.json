@@ -1,26 +1,24 @@
 {
-	"name": "rpm-spec-changelog",
-	"displayName": "RPM Spec Changelog",
+	"name": "rpmspec-changelog",
+	"displayName": "RPMSpec Changelog",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you.",
-	"version": "1.0.0",
-	"publisher": "mymindstorm",
+	"version": "1.2.1",
+	"publisher": "adadov",
 	"repository": {
-		"type": "git",
-		"url": "https://github.com/mymindstorm/rpm-spec-changelog.git"
+		"type": "https",
+		"url": "https://github.com/Adadov/rpmspec-changelog"
 	},
 	"bugs": {
-		"url": "https://github.com/mymindstorm/rpm-spec-changelog/issues"
+		"url": "https://github.com/Adadov/rpmspec-changelog/issues"
 	},
 	"engines": {
-		"vscode": "^1.41.0"
+		"vscode": "^1.82.0"
 	},
 	"categories": [
 		"Snippets",
 		"Other"
 	],
-	"activationEvents": [
-		"onCommand:extension.insertRPMSpecChangelog"
-	],
+	"activationEvents": [],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
@@ -28,24 +26,45 @@
 				"command": "extension.insertRPMSpecChangelog",
 				"title": "RPM: Insert Changelog"
 			}
-		]
+		],
+		"configuration": {
+			"title": "RPMSpec Changelog",
+			"properties": {
+				"rpmspecChangelog.obtainNameAndEmailFromGit": {
+					"type": "boolean",
+					"default": true,
+					"description": "Use git developper informations (Only if manual field is empty)",
+					"order": 2,
+					"scope": "resource"
+				},
+				"rpmspecChangelog.maintainerName": {
+					"type": "string",
+					"description": "Disable git for name",
+					"order": 1,
+					"scope": "resource"
+				},
+				"rpmspecChangelog.maintainerEmail": {
+					"type": "string",
+					"description": "Disable git for email",
+					"order": 2,
+					"scope": "resource"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
-		"lint": "eslint src --ext ts",
+		"lint": "eslint -c .eslintrc.json src/*.ts",
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint"
 	},
 	"devDependencies": {
-		"@types/glob": "^7.1.1",
-		"@types/node": "^12.11.7",
-		"@types/vscode": "^1.41.0",
-		"@typescript-eslint/eslint-plugin": "^2.18.0",
-		"@typescript-eslint/parser": "^2.18.0",
-		"eslint": "^6.8.0",
-		"glob": "^7.1.6",
-		"typescript": "^3.7.5",
-		"vscode-test": "^1.3.0"
+		"@types/node": "^18.19.63",
+		"@types/vscode": "^1.95.0",
+		"@typescript-eslint/eslint-plugin": "^8.12.2",
+		"@typescript-eslint/parser": "^8.12.2",
+		"@vscode/test-electron": "^2.4.1",
+		"eslint": "^8.57.1"
 	}
 }

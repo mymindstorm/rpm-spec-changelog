@@ -1,11 +1,13 @@
-import * as vscode from "vscode";
 import { exec } from "child_process";
+import { ExtensionContext, workspace, commands, window, SnippetString } from "vscode";
 
-export function activate(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerTextEditorCommand(
+export function activate(context: ExtensionContext) {
+  const settings = workspace.getConfiguration('rpmspecChangelog');
+
+  let disposable = commands.registerTextEditorCommand(
     "extension.insertRPMSpecChangelog",
     async () => {
-      const currentDocument = vscode.window.activeTextEditor;
+      const currentDocument = window.activeTextEditor;
 
       if (!currentDocument) {
         return;
@@ -24,18 +26,28 @@ export function activate(context: vscode.ExtensionContext) {
       const parts = new Intl.DateTimeFormat('en-us', options).formatToParts(date);
       const curdate = parts.filter((v) => { if (v.type !== 'literal') { return v.value; } }).map((v) => v.value).join(' ');
 
-      const snippet = new vscode.SnippetString("* " + curdate);
+      const snippet = new SnippetString("* " + curdate);
 
-      const name = await new Promise(resolve => exec("git config user.name", (_error, stdout: string) => {
-        resolve(stdout.trim());
-      }));
+      if (settings.get('rpmspecChangelog.obtainNameAndEmailFromGit')) {
+        const name = await new Promise(resolve => exec("git config user.name", (_error, stdout: string) => {
+          resolve(stdout.trim());
+        }));
 
-      const email = await new Promise(resolve => exec("git config user.email", (_error, stdout: string) => {
-        resolve(stdout.trim());
-      }));
+        const email = await new Promise(resolve => exec("git config user.email", (_error, stdout: string) => {
+          resolve(stdout.trim());
+        }));
+        if (name || email) {
+          snippet.appendText(` ${name} <${email}>`);
+        }
+      }
+      else {
+        const name = settings.get('rpmspecChangelog.maintainerName');
+        const email = settings.get('rpmspecChangelog.maintainerEmail');
 
-      if (name || email) {
-        snippet.appendText(` ${name} <${email}>`);
+        if (name || email) {
+          snippet.appendText(` ${name} <${email}>`);
+        }
+
       }
 
       const fullversion = await new Promise(resolve => exec(`rpmspec -P ${currentDocument.document.fileName} | awk '/^Version/ { ver=$2; } /^Release/ { gsub(/\.[a-z]+[0-9]+$/, "", $2); rel=$2; } END { printf("%s-%s", ver, rel); }'`, (error, stdout) => {
