@@ -26,29 +26,36 @@ export function activate(context: ExtensionContext) {
       const parts = new Intl.DateTimeFormat('en-us', options).formatToParts(date);
       const curdate = parts.filter((v) => { if (v.type !== 'literal') { return v.value; } }).map((v) => v.value).join(' ');
 
+      console.log(curdate);
+      console.log(settings.get('obtainNameAndEmailFromGit'));
+
       const snippet = new SnippetString("* " + curdate);
 
-      if (settings.get('rpmspecChangelog.obtainNameAndEmailFromGit')) {
-        const name = await new Promise(resolve => exec("git config user.name", (_error, stdout: string) => {
-          resolve(stdout.trim());
-        }));
+      var email, name;
 
-        const email = await new Promise(resolve => exec("git config user.email", (_error, stdout: string) => {
+      if (!settings.get('maintainerName')) {
+        name = await new Promise(resolve => exec("/usr/bin/git config user.name", (_error, stdout: string) => {
+          console.log(_error);
+          console.log(stdout);
           resolve(stdout.trim());
         }));
-        if (name || email) {
-          snippet.appendText(` ${name} <${email}>`);
-        }
       }
       else {
-        const name = settings.get('rpmspecChangelog.maintainerName');
-        const email = settings.get('rpmspecChangelog.maintainerEmail');
-
-        if (name || email) {
-          snippet.appendText(` ${name} <${email}>`);
-        }
-
+        name = settings.get('maintainerName');
       }
+
+      if (!settings.get('maintainerEmail')) {
+        email = await new Promise(resolve => exec("/usr/bin/git config user.email", (_error, stdout: string) => {
+          console.log(stdout);
+          resolve(stdout.trim());
+        }));
+      }
+      else {
+        email = settings.get('maintainerEmail');
+      }
+
+      console.log(name, email);
+      snippet.appendText(` ${name} <${email}>`);
 
       const fullversion = await new Promise(resolve => exec(`rpmspec -P ${currentDocument.document.fileName} | awk '/^Version/ { ver=$2; } /^Release/ { gsub(/\.[a-z]+[0-9]+$/, "", $2); rel=$2; } END { printf("%s-%s", ver, rel); }'`, (error, stdout) => {
         resolve(stdout.trim());
