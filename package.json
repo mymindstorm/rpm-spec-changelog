@@ -2,7 +2,7 @@
 	"name": "rpmspec-changelog",
 	"displayName": "RPMSpec Changelog",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you.",
-	"version": "1.2.1",
+	"version": "1.2.0",
 	"publisher": "adadov",
 	"repository": {
 		"type": "https",
@@ -12,7 +12,7 @@
 		"url": "https://github.com/Adadov/rpmspec-changelog/issues"
 	},
 	"engines": {
-		"vscode": "^1.82.0"
+		"vscode": "^1.95.0"
 	},
 	"categories": [
 		"Snippets",
@@ -30,22 +30,15 @@
 		"configuration": {
 			"title": "RPMSpec Changelog",
 			"properties": {
-				"rpmspecChangelog.obtainNameAndEmailFromGit": {
-					"type": "boolean",
-					"default": true,
-					"description": "Use git developper informations (Only if manual field is empty)",
-					"order": 2,
-					"scope": "resource"
-				},
 				"rpmspecChangelog.maintainerName": {
 					"type": "string",
-					"description": "Disable git for name",
+					"description": "Use this name instead of git developper name",
 					"order": 1,
 					"scope": "resource"
 				},
 				"rpmspecChangelog.maintainerEmail": {
 					"type": "string",
-					"description": "Disable git for email",
+					"description": "Use this name instead of git developper email",
 					"order": 2,
 					"scope": "resource"
 				}
