@@ -2,7 +2,7 @@
 	"name": "rpmspec-changelog",
 	"displayName": "RPMSpec Changelog",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you.",
-	"version": "1.3.1",
+	"version": "1.3.3",
 	"publisher": "adadov",
 	"repository": {
 		"type": "https",
@@ -46,17 +46,9 @@
 				}
 			}
 		},
-		"inputs": [
-			{
-				"id": "fversion",
-				"description": "Version number ?",
-				"default": "41",
-				"type": "promptString"
-			}
-		],
 		"taskDefinitions": [
 			{
-				"type": "custombuildscript",
+				"type": "rpmbuild",
 				"properties": {
 					"fversion": {
 						"type": "string",
