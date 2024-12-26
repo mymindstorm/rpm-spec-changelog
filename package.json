@@ -65,6 +65,9 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint"
 	},
+	"extensionDependencies": [
+		"rvsmartporting.rpm-spec-ext"
+	],
 	"devDependencies": {
 		"@types/node": "^18.19.63",
 		"@types/vscode": "^1.95.0",
