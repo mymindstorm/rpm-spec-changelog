@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 	<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 		<Metadata>
-			<Identity Language="en-US" Id="rpmspec-changelog" Version="1.2.0" Publisher="adadov" />
+			<Identity Language="en-US" Id="rpmspec-changelog" Version="1.3.6" Publisher="adadov" />
 			<DisplayName>RPMSpec Changelog</DisplayName>
 			<Description xml:space="preserve">Inserts a properly formatted changelog line to your RPM spec file for you.</Description>
 			<Tags></Tags>
 			<Categories>Snippets,Other</Categories>
 			<GalleryFlags>Public</GalleryFlags>
-			
+
 			<Properties>
 				<Property Id="Microsoft.VisualStudio.Code.Engine" Value="^1.82.0" />
 				<Property Id="Microsoft.VisualStudio.Code.ExtensionDependencies" Value="" />
 				<Property Id="Microsoft.VisualStudio.Code.ExtensionPack" Value="" />
 				<Property Id="Microsoft.VisualStudio.Code.ExtensionKind" Value="workspace" />
 				<Property Id="Microsoft.VisualStudio.Code.LocalizedLanguages" Value="" />
-				
-				
+
+
 				<Property Id="Microsoft.VisualStudio.Services.Links.Source" Value="https://github.com/Adadov/rpmspec-changelog.git" />
 				<Property Id="Microsoft.VisualStudio.Services.Links.Getstarted" Value="https://github.com/Adadov/rpmspec-changelog.git" />
 				<Property Id="Microsoft.VisualStudio.Services.Links.GitHub" Value="https://github.com/Adadov/rpmspec-changelog.git" />
 				<Property Id="Microsoft.VisualStudio.Services.Links.Support" Value="https://github.com/Adadov/rpmspec-changelog/issues" />
 				<Property Id="Microsoft.VisualStudio.Services.Links.Learn" Value="https://github.com/Adadov/rpmspec-changelog#readme" />
-				
-				
+
+
 				<Property Id="Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown" Value="true" />
 				<Property Id="Microsoft.VisualStudio.Services.Content.Pricing" Value="Free"/>
 
-				
-				
+
+
 			</Properties>
 			<License>extension/LICENSE.txt</License>
-			
+
 		</Metadata>
 		<Installation>
 			<InstallationTarget Id="Microsoft.VisualStudio.Code"/>

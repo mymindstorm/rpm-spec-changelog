@@ -1,8 +1,9 @@
 # RPMSpec Changelog
 
-## [1.3] - 2024-12-26
+## [1.3] - 2024-12-27
 
 - Add mock build task
+- Improve changelog insertion: Snippet is automaticaly inserted right after %changelog
 
 ## [1.2]
 
