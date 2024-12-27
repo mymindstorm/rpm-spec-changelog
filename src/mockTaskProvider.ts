@@ -1,22 +1,20 @@
 import * as vscode from 'vscode';
 
+const logs: vscode.OutputChannel = vscode.window.createOutputChannel("Mock", {log: true});
 
 interface mockBuildTaskDefinition extends vscode.TaskDefinition {
-
+  os: string;
+  arch?: string;
+  version: number;
+  type: string;
+  download: boolean;
 }
-const logs: vscode.OutputChannel = vscode.window.createOutputChannel("Mock");
 
 export class mockBuildTaskProvider implements vscode.TaskProvider {
   static mockBuildScriptType = 'rpmbuild';
   private tasks: vscode.Task[] = [];
 
-  private definition = {
-    type: mockBuildTaskProvider.mockBuildScriptType
-  };
-
   constructor(private workspaceRoot: string) {
-    logs.appendLine("Oneline")
-    logs.show(true);
   }
 
   public async provideTasks(): Promise<vscode.Task[]> {
@@ -33,24 +31,46 @@ export class mockBuildTaskProvider implements vscode.TaskProvider {
     this.tasks = [];
 
     let oses: string[] = settings.get("mockOses") ?? [];
-    console.log("oses", oses);
+    logs.appendLine("oses: " + oses.join('\n'));
+    let definition: mockBuildTaskDefinition;
     if (oses!.length > 0) {
       let cmd = "";
       for (let i = 0; i < oses.length; i++) {
         let os = oses[i];
-        let task: vscode.Task = this.getTask(os + "") as vscode.Task;
+        let parts = os.split('-');
+        definition = {
+          type: mockBuildTaskProvider.mockBuildScriptType,
+          download: false,
+          os: parts[0],
+          arch: parts[2],
+          version: parseInt(parts[1])
+        };
+        let task: vscode.Task = this.getTask(definition) as vscode.Task;
         this.tasks!.push(task);
-        cmd += `mock -r ${os} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil';`
+        cmd += `mock -r ${os} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil';`;
       }
       const termExec = new vscode.ShellExecution(cmd);
-      const allTask = new vscode.Task(this.definition, vscode.TaskScope.Workspace, `run mock: all`,
+      definition = {
+        type: mockBuildTaskProvider.mockBuildScriptType,
+        download: false,
+        os: "all",
+        arch: "",
+        version: 0
+      };
+      const allTask = new vscode.Task(definition, vscode.TaskScope.Workspace, `run mock: all`,
         mockBuildTaskProvider.mockBuildScriptType, termExec);
       this.tasks!.push(allTask);
     } else {
       let base = 40;
       for (let i = 0; i < 3; i++) {
-        let task = this.getTask("fedora-" + (base + i) + "-x86_64");
-        console.log("fedora-" + (base + i) + "-x86_64");
+        definition = {
+          type: mockBuildTaskProvider.mockBuildScriptType,
+          os: "fedora",
+          arch: "x86_64",
+          version: base + i,
+          download: false
+        };
+        let task = this.getTask(definition);
         if (task instanceof vscode.Task) {
           this.tasks!.push(task);
         }
@@ -60,14 +80,15 @@ export class mockBuildTaskProvider implements vscode.TaskProvider {
     return this.tasks;
   }
 
-  private getTask(os: string): vscode.Task | undefined {
-    logs.appendLine("OS: " + os);
+  private getTask(definition: mockBuildTaskDefinition): vscode.Task | undefined {
+    const config = definition.os + "-" + definition.version + "-" + definition.arch;
+    logs.appendLine("OS: " + definition.os);
+
     if (!vscode.window.activeTextEditor?.document.fileName.endsWith(".spec")) {
       return undefined;
     }
-    const termExec = new vscode.ShellExecution(`echo "vers: ${os}"; mock -r ${os} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil'`);
-    return new vscode.Task(this.definition, vscode.TaskScope.Workspace, `run mock: ${os}`,
+    const termExec = new vscode.ShellExecution(`echo "vers: ${config}"; mock -r ${config} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil'`);
+    return new vscode.Task(definition, vscode.TaskScope.Workspace, `run mock: ${config}`,
       mockBuildTaskProvider.mockBuildScriptType, termExec);
   }
 }
-;

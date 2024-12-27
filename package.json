@@ -32,17 +32,26 @@
 		"configuration": {
 			"title": "RPMSpec Changelog",
 			"properties": {
+				"rpmspecChangelog.mockOses": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"description": "Mock Oses configurations",
+					"order": 1,
+					"scope": "application"
+				},
 				"rpmspecChangelog.maintainerName": {
 					"type": "string",
 					"description": "Use this instead of git developper name",
-					"order": 1,
-					"scope": "resource"
+					"order": 2,
+					"scope": "application"
 				},
 				"rpmspecChangelog.maintainerEmail": {
 					"type": "string",
 					"description": "Use this instead of git developper email",
-					"order": 2,
-					"scope": "resource"
+					"order": 3,
+					"scope": "application"
 				}
 			}
 		},
@@ -50,9 +59,28 @@
 			{
 				"type": "rpmbuild",
 				"properties": {
-					"fversion": {
-						"type": "string",
-						"description": "Fedora Version"
+					"version": {
+						"type": "number",
+						"description": "OS version"
+					},
+					"download": {
+						"type": "boolean",
+						"default": false,
+						"description": "Download sources"
+					},
+					"type": {
+						"type":"string",
+						"default": "rpmbuild",
+						"description": ""
+					},
+					"os": {
+						"type":"string",
+						"description": "mock OS configuration (ex: alma+epel)"
+					},
+					"arch": {
+						"type":"string",
+						"default":"x86_64",
+						"description": "Destination arch"
 					}
 				}
 			}
