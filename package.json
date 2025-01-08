@@ -2,7 +2,7 @@
 	"name": "rpmspec-changelog",
 	"displayName": "RPMSpec Snippets and Mock build",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you. Can also run mock directly for one or many OS",
-	"version": "1.3.6",
+	"version": "1.4.0",
 	"publisher": "adadov",
 	"repository": {
 		"type": "https",
@@ -12,7 +12,7 @@
 		"url": "https://github.com/Adadov/rpmspec-changelog/issues"
 	},
 	"engines": {
-		"vscode": "^1.95.0"
+		"vscode": "^1.96.0"
 	},
 	"categories": [
 		"Snippets",
@@ -37,19 +37,19 @@
 					"items": {
 						"type": "string"
 					},
-					"description": "Mock Oses configurations",
+					"description": "Mock configurations list",
 					"order": 1,
 					"scope": "application"
 				},
 				"rpmspecChangelog.maintainerName": {
 					"type": "string",
-					"description": "Use this instead of git developper name",
+					"description": "Use this instead of git config user.name",
 					"order": 2,
 					"scope": "application"
 				},
 				"rpmspecChangelog.maintainerEmail": {
 					"type": "string",
-					"description": "Use this instead of git developper email",
+					"description": "Use this instead of git config user.email",
 					"order": 3,
 					"scope": "application"
 				}
@@ -69,17 +69,17 @@
 						"description": "Download sources"
 					},
 					"type": {
-						"type":"string",
+						"type": "string",
 						"default": "rpmbuild",
 						"description": ""
 					},
 					"os": {
-						"type":"string",
-						"description": "mock OS configuration (ex: alma+epel)"
+						"type": "string",
+						"description": "Mock OS configuration (ex: alma+epel)"
 					},
 					"arch": {
-						"type":"string",
-						"default":"x86_64",
+						"type": "string",
+						"default": "x86_64",
 						"description": "Destination arch"
 					}
 				}
@@ -88,9 +88,7 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
-		"vscode:publish":
-			"vsce package && eval $([ -e .tokens ] && cat .tokens); export VSCE_PAT; vsce publish"
-		,
+		"vscode:publish": "vsce package && eval $([ -e .tokens ] && cat .tokens); export VSCE_PAT; vsce publish",
 		"compile": "tsc -p ./",
 		"lint": "eslint -c .eslintrc.json src/*.ts",
 		"watch": "tsc -watch -p ./",
@@ -100,10 +98,10 @@
 		"rvsmartporting.rpm-spec-ext"
 	],
 	"devDependencies": {
-		"@types/node": "^18.19.63",
-		"@types/vscode": "^1.95.0",
-		"@typescript-eslint/eslint-plugin": "^8.12.2",
-		"@typescript-eslint/parser": "^8.12.2",
+		"@types/node": "^18.19.68",
+		"@types/vscode": "^1.96.0",
+		"@typescript-eslint/eslint-plugin": "^8.18.2",
+		"@typescript-eslint/parser": "^8.18.2",
 		"@vscode/test-electron": "^2.4.1",
 		"eslint": "^8.57.1"
 	}

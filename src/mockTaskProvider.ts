@@ -81,12 +81,12 @@ export class mockBuildTaskProvider implements vscode.TaskProvider {
   }
 
   private getTask(definition: mockBuildTaskDefinition): vscode.Task | undefined {
-    const config = definition.os + "-" + definition.version + "-" + definition.arch;
-    logs.appendLine("OS: " + definition.os);
-
     if (!vscode.window.activeTextEditor?.document.fileName.endsWith(".spec")) {
       return undefined;
     }
+    const config = definition.os + "-" + definition.version + "-" + definition.arch;
+    logs.appendLine("OS: " + definition.os);
+
     const termExec = new vscode.ShellExecution(`echo "vers: ${config}"; mock -r ${config} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil'`);
     return new vscode.Task(definition, vscode.TaskScope.Workspace, `run mock: ${config}`,
       mockBuildTaskProvider.mockBuildScriptType, termExec);
