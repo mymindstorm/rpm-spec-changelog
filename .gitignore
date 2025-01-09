@@ -5,3 +5,4 @@ node_modules
 extension/
 *Content_Types*
 .tokens
+!tests/

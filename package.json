@@ -25,13 +25,22 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.insertRPMSpecChangelog",
+				"command": "rpmspecChangelog.insertRPMSpecChangelog",
 				"title": "RPM: Insert Changelog"
+			},
+			{
+				"command": "rpmspecChangelog.runMock",
+				"title": "Mock: Run for ..."
 			}
 		],
 		"configuration": {
 			"title": "RPMSpec Changelog",
 			"properties": {
+				"rpmspecChangelog.debug": {
+					"type": "boolean",
+					"description": "Show more logs",
+					"default": false
+				},
 				"rpmspecChangelog.mockOses": {
 					"type": "array",
 					"items": {
@@ -40,6 +49,11 @@
 					"description": "Mock configurations list",
 					"order": 1,
 					"scope": "application"
+				},
+				"rpmspecChangelog.showAll": {
+					"type": "boolean",
+					"description": "All to run mock for all OS at once",
+					"default": false
 				},
 				"rpmspecChangelog.maintainerName": {
 					"type": "string",
