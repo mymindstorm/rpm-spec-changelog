@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
 
-const logs: vscode.OutputChannel = vscode.window.createOutputChannel("Mock", {log: true});
+const logs: vscode.OutputChannel = vscode.window.createOutputChannel("Mock", { log: true });
 
 interface mockBuildTaskDefinition extends vscode.TaskDefinition {
-  os: string;
-  arch?: string;
-  version: number;
+  name: string;
   type: string;
   download: boolean;
 }
@@ -13,8 +11,10 @@ interface mockBuildTaskDefinition extends vscode.TaskDefinition {
 export class mockBuildTaskProvider implements vscode.TaskProvider {
   static mockBuildScriptType = 'rpmbuild';
   private tasks: vscode.Task[] = [];
+  private settings: vscode.WorkspaceConfiguration;
 
   constructor(private workspaceRoot: string) {
+    this.settings = vscode.workspace.getConfiguration('rpmspecChangelog');
   }
 
   public async provideTasks(): Promise<vscode.Task[]> {
@@ -22,58 +22,76 @@ export class mockBuildTaskProvider implements vscode.TaskProvider {
   }
 
   public resolveTask(_task: vscode.Task): vscode.Task | undefined {
-    return _task;
+    const name: string = _task.definition.name;
+    if (name) {
+      const definition: mockBuildTaskDefinition = <any>_task.definition;
+      return this.getTask(definition);
+    }
+
+    return undefined;
+  }
+
+  // private getDefaultDefinition() {
+  //   return {
+  //     type: mockBuildTaskProvider.mockBuildScriptType,
+  //     download: false,
+  //     name: null
+  //   };
+  // }
+
+  public static createDefinition(os: string) {
+    return {
+      type: mockBuildTaskProvider.mockBuildScriptType,
+      download: false,
+      name: os
+    };
   }
 
   private getTasks(): vscode.Task[] {
-    const settings = vscode.workspace.getConfiguration('rpmspecChangelog');
+    const settings = this.settings;
 
     this.tasks = [];
 
     let oses: string[] = settings.get("mockOses") ?? [];
-    logs.appendLine("oses: " + oses.join('\n'));
+    if (this.settings.get('debug')) {
+      logs.appendLine("oses: " + oses.join(' '));
+    }
+
     let definition: mockBuildTaskDefinition;
     if (oses!.length > 0) {
       let cmd = "";
       for (let i = 0; i < oses.length; i++) {
         let os = oses[i];
-        let parts = os.split('-');
-        definition = {
-          type: mockBuildTaskProvider.mockBuildScriptType,
-          download: false,
-          os: parts[0],
-          arch: parts[2],
-          version: parseInt(parts[1])
-        };
+        // let parts = os.split('-');
+        const definition = mockBuildTaskProvider.createDefinition(os);
         let task: vscode.Task = this.getTask(definition) as vscode.Task;
         this.tasks!.push(task);
-        cmd += `mock -r ${os} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil';`;
+
+        if (settings.get('showAll')) {
+          cmd += this.getTaskCmd(definition.name);
+        }
       }
-      const termExec = new vscode.ShellExecution(cmd);
+
+      if (settings.get('showAll')) {
+        const termExec = new vscode.ShellExecution(cmd);
+        const definition = mockBuildTaskProvider.createDefinition("all");
+        const allTask = new vscode.Task(definition,
+          vscode.TaskScope.Workspace,
+          `run mock: all`,
+          mockBuildTaskProvider.mockBuildScriptType,
+          termExec);
+        this.tasks!.push(allTask);
+      }
+    } else {
+      let base = 41;
       definition = {
         type: mockBuildTaskProvider.mockBuildScriptType,
-        download: false,
-        os: "all",
-        arch: "",
-        version: 0
+        name: "fedora" + base + "x86_64",
+        download: false
       };
-      const allTask = new vscode.Task(definition, vscode.TaskScope.Workspace, `run mock: all`,
-        mockBuildTaskProvider.mockBuildScriptType, termExec);
-      this.tasks!.push(allTask);
-    } else {
-      let base = 40;
-      for (let i = 0; i < 3; i++) {
-        definition = {
-          type: mockBuildTaskProvider.mockBuildScriptType,
-          os: "fedora",
-          arch: "x86_64",
-          version: base + i,
-          download: false
-        };
-        let task = this.getTask(definition);
-        if (task instanceof vscode.Task) {
-          this.tasks!.push(task);
-        }
+      let task = this.getTask(definition);
+      if (task instanceof vscode.Task) {
+        this.tasks!.push(task);
       }
     }
 
@@ -84,11 +102,37 @@ export class mockBuildTaskProvider implements vscode.TaskProvider {
     if (!vscode.window.activeTextEditor?.document.fileName.endsWith(".spec")) {
       return undefined;
     }
-    const config = definition.os + "-" + definition.version + "-" + definition.arch;
-    logs.appendLine("OS: " + definition.os);
 
-    const termExec = new vscode.ShellExecution(`echo "vers: ${config}"; mock -r ${config} --spec ` + '${file}' + ` --sources ~/rpmbuild/SOURCES '-D disable_source_fetch %nil'`);
-    return new vscode.Task(definition, vscode.TaskScope.Workspace, `run mock: ${config}`,
+    const config = definition.name
+    const cmd = this.getTaskCmd(config)
+
+    if (this.settings.get('debug')) {
+      logs.appendLine("CMD: " + cmd);
+      logs.appendLine("OS: " + definition.os);
+    }
+
+    const termExec = new vscode.ShellExecution(cmd);
+    return new vscode.Task(definition, vscode.TaskScope.Workspace, `Mock: ${config}`,
       mockBuildTaskProvider.mockBuildScriptType, termExec);
+  }
+
+  private getTaskCmd(config: string): string {
+    // let sources = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor?.document.uri)
+    let sources = "~/rpmbuild/SOURCES"
+    let cmd: string = `cat $(mock -r ${config} --debug-config-expanded|awk '/config_file/ {print $3}'|tr -d "'") > tmp.cfg;`
+
+    try {
+      const mockcfg = vscode.workspace.findFiles('mock.cfg').then((uri) => { console.log('uri', uri) })
+
+      cmd += `cat mock.cfg >> tmp.cfg;`
+      if (this.settings.get('debug')) { logs.appendLine("mock.cfg found !!") }
+    } catch (e) {
+      if (this.settings.get('debug')) { logs.appendLine("mock.cfg NOT found !!") }
+    }
+
+    cmd += `echo "vers: ${config}"; mock -r tmp.cfg --spec ` + '${file}' + ` --sources ${sources} -D 'disable_source_fetch %nil';rm -f tmp.cfg;`
+
+    return cmd
+
   }
 }

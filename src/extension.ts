@@ -1,30 +1,33 @@
-import * as vscode from 'vscode';
+import { commands, workspace, ExtensionContext, window, OutputChannel, tasks, WorkspaceConfiguration, SnippetString, Disposable } from 'vscode';
 import { exec } from "child_process";
 import { mockBuildTaskProvider } from './mockTaskProvider';
+import quickInput from './quickInput';
 
-let mockTaskProvider: vscode.Disposable | undefined;
-let settings: vscode.WorkspaceConfiguration;
-const logs: vscode.OutputChannel = vscode.window.createOutputChannel("Mock");
+let mockTaskProvider: Disposable | undefined;
+let settings: WorkspaceConfiguration;
+const logs: OutputChannel = window.createOutputChannel("InsertChangelog");
 
-export function activate(context: vscode.ExtensionContext) {
-  const workspaceRoot = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
-    ? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
+export function activate(context: ExtensionContext) {
+  const workspaceRoot = (workspace.workspaceFolders && (workspace.workspaceFolders.length > 0))
+    ? workspace.workspaceFolders[0].uri.fsPath : undefined;
 
   if (!workspaceRoot) {
     return;
   }
 
-  settings = vscode.workspace.getConfiguration('rpmspecChangelog');
-  mockTaskProvider = vscode.tasks.registerTaskProvider(mockBuildTaskProvider.mockBuildScriptType, new mockBuildTaskProvider(workspaceRoot));
+  context.subscriptions.push(commands.registerCommand('rpmspecChangelog.runMock', quickInput, context));
+
+  settings = workspace.getConfiguration('rpmspecChangelog');
+  mockTaskProvider = tasks.registerTaskProvider(mockBuildTaskProvider.mockBuildScriptType, new mockBuildTaskProvider(workspaceRoot));
   context.subscriptions.push(mockTaskProvider);
 
-  let disposable = vscode.commands.registerTextEditorCommand(
+  let disposable = commands.registerTextEditorCommand(
     "extension.insertRPMSpecChangelog",
     async () => {
-      if (!vscode.window.activeTextEditor?.document.fileName.endsWith(".spec")) {
+      if (!window.activeTextEditor?.document.fileName.endsWith(".spec")) {
         return undefined;
       }
-      const currentDocument = vscode.window.activeTextEditor;
+      const currentDocument = window.activeTextEditor;
 
       if (!currentDocument) {
         return;
@@ -43,9 +46,8 @@ export function activate(context: vscode.ExtensionContext) {
       const curdate = parts.filter((v) => { if (v.type !== 'literal') { return v.value; } }).map((v) => v.value).join(' ');
 
       logs.appendLine("Date: " + curdate);
-      logs.show(false);
 
-      const snippet = new vscode.SnippetString("* " + curdate);
+      const snippet = new SnippetString("* " + curdate);
 
       var email: string | undefined, name: string | undefined;
 
@@ -53,7 +55,6 @@ export function activate(context: vscode.ExtensionContext) {
         name = await new Promise(resolve => exec("/usr/bin/git config user.name", (_error, stdout: string) => {
           logs.appendLine("Error: " + _error?.message as string);
           logs.appendLine("Out: " + stdout);
-          logs.show(false);
 
           resolve(stdout.trim());
         }));
@@ -65,7 +66,6 @@ export function activate(context: vscode.ExtensionContext) {
       if (!settings.get('maintainerEmail')) {
         email = await new Promise(resolve => exec("/usr/bin/git config user.email", (_error, stdout: string) => {
           logs.appendLine(stdout);
-          logs.show(false);
           resolve(stdout.trim());
         }));
       }
