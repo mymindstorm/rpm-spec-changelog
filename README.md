@@ -1,3 +1,5 @@
+# Deprecated in favor of [rpmautospec](https://docs.pagure.org/Fedora-Infra.rpmautospec/index.html)
+
 # RPM Spec Changelog
 
 Inserts a properly formatted changelog line to your RPM spec file for you.
