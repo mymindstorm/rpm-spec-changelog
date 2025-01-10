@@ -1,52 +1,157 @@
 {
-	"name": "rpm-spec-changelog",
-	"displayName": "RPM Spec Changelog",
-	"description": "Inserts a properly formatted changelog line to your RPM spec file for you.",
-	"version": "1.0.0",
-	"publisher": "mymindstorm",
+	"name": "rpmspec-changelog",
+	"displayName": "RPMSpec Snippets and Mock build",
+	"description": "Inserts a properly formatted changelog line to your RPM spec file for you. Can also run mock directly for one or many OS",
+	"version": "1.5.0",
+	"publisher": "adadov",
 	"repository": {
-		"type": "git",
-		"url": "https://github.com/mymindstorm/rpm-spec-changelog.git"
+		"type": "https",
+		"url": "https://github.com/Adadov/rpmspec-changelog"
 	},
 	"bugs": {
-		"url": "https://github.com/mymindstorm/rpm-spec-changelog/issues"
+		"url": "https://github.com/Adadov/rpmspec-changelog/issues"
 	},
 	"engines": {
-		"vscode": "^1.41.0"
+		"vscode": "^1.96.0"
 	},
 	"categories": [
 		"Snippets",
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.insertRPMSpecChangelog"
+		"onCommand:workbench.action.tasks.runTask",
+		"onLanguage:rpmspec",
+		"onLanguage:rpm-spec",
+		"onLanguage"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.insertRPMSpecChangelog",
+				"command": "rpmspecChangelog.insertRPMSpecChangelog",
 				"title": "RPM: Insert Changelog"
+			},
+			{
+				"command": "rpmspecChangelog.runMock",
+				"title": "RPM: Run mock for ..."
+			}
+		],
+		"configurationDefaults": {},
+		"configuration": [
+			{
+				"id": "changelog",
+				"title": "RPMSpec Changelog",
+				"displayName": "SPEC Snippets & Mock",
+				"order": 1,
+				"properties": {
+					"rpmspecChangelog.maintainerName": {
+						"title": "Maintainer name",
+						"type": "string",
+						"description": "Use this instead of git config user.name",
+						"order": 1,
+						"scope": "resource"
+					},
+					"rpmspecChangelog.maintainerEmail": {
+						"type": "string",
+						"description": "Use this instead of git config user.email",
+						"order": 2,
+						"scope": "resource"
+					},
+					"rpmspecChangelog.logDebug": {
+						"order": 3,
+						"type": "boolean",
+						"description": "Show more logs",
+						"default": false,
+						"scope": "resource"
+					}
+				}
+			},
+			{
+				"id": "mock",
+				"title": "Mock",
+				"displayName": "Mock",
+				"order": 2,
+				"properties": {
+					"mock.profils": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"default": [
+							"fedora-41-x86_64",
+							"fedora-42-x86_64",
+							"alma+epel-8-x86_64",
+							"alma+epel-9-x86_64"
+						],
+						"description": "Mock configurations list",
+						"order": 4,
+						"scope": "resource"
+					},
+					"mock.showAllProfils": {
+						"order": 5,
+						"type": "boolean",
+						"description": "All to run mock for all OS at once",
+						"default": true,
+						"scope": "resource"
+					},
+					"mock.repository": {
+						"type": "string",
+						"description": "Project repository URL",
+						"scope": "resource",
+						"order": 6
+					},
+					"mock.repositoryBranch": {
+						"type": "string",
+						"description": "Project repository branch",
+						"scope": "resource",
+						"order": 7
+					},
+					"mock.packageName": {
+						"type": "string",
+						"description": "Package name",
+						"scope": "resource",
+						"order": 8
+					}
+				}
+			}
+		],
+		"taskDefinitions": [
+			{
+				"type": "RPM",
+				"properties": {
+					"download": {
+						"type": "boolean",
+						"default": false,
+						"description": "Download sources"
+					},
+					"type": {
+						"type": "string",
+						"default": "rpm",
+						"description": ""
+					},
+					"name": {
+						"type": "string",
+						"description": "Configuration name (ex: fedora-41-x86_64)"
+					}
+				}
 			}
 		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"lint": "eslint src --ext ts",
-		"watch": "tsc -watch -p ./",
+		"vscode:publish": "vsce package && eval $([ -e .tokens ] && cat .tokens); export VSCE_PAT; vsce publish",
+		"compile": "tsc -b --sourceMap true --clean && tsc -p ./",
+		"lint": "eslint -c .eslintrc.json src/*.ts",
+		"watch": "tsc -watch --sourceMap true -p ./",
+		"dev": "tsc --sourceMap true -p ./",
 		"pretest": "npm run compile && npm run lint"
 	},
 	"devDependencies": {
-		"@types/glob": "^7.1.1",
-		"@types/node": "^12.11.7",
-		"@types/vscode": "^1.41.0",
-		"eslint": "^6.8.0",
-		"@typescript-eslint/parser": "^2.18.0",
-		"@typescript-eslint/eslint-plugin": "^2.18.0",
-		"glob": "^7.1.6",
-		"mocha": "^7.0.1",
-		"typescript": "^3.7.5",
-		"vscode-test": "^1.3.0"
+		"@types/node": "^18.19",
+		"@types/vscode": "^1.96",
+		"@typescript-eslint/eslint-plugin": "^8.18",
+		"@typescript-eslint/parser": "^8.18",
+		"@vscode/test-electron": "^2.4",
+		"eslint": "^8.57"
 	}
 }

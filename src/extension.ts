@@ -1,67 +1,49 @@
-import * as vscode from "vscode";
-import * as cp from "child_process";
+import * as vs from 'vscode';
+import { commands, workspace, ExtensionContext, window, OutputChannel, tasks, Disposable } from 'vscode';
+import { insertChangelog } from "./insertChangelog";
+import { mockBuildTaskProvider } from './mockTaskProvider';
+import { quickInput } from './quickInput';
 
-export function activate(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerTextEditorCommand(
-    "extension.insertRPMSpecChangelog",
-    async () => {
-      const currentDocument = vscode.window.activeTextEditor;
+let mockTaskProvider: Disposable | undefined;
+let insertChangelogCommand: Disposable | undefined;
+let runMockCommand: Disposable | undefined;
 
-      if (!currentDocument) {
-        return;
-      }
+export const logs: OutputChannel = window.createOutputChannel("RPMSpec Snippets", { log: true });
 
-      const snippet = new vscode.SnippetString(
-        "* ${CURRENT_DAY_NAME_SHORT} ${CURRENT_MONTH_NAME_SHORT} ${CURRENT_DATE} ${CURRENT_YEAR}"
-      );
+logs.appendLine("RPMSpec loaded");
+logs.show(true);
 
-      const name = await new Promise(resolve => {
-        cp.exec("git config user.name", (error, stdout, stderr) => {
-          resolve(stdout.trim());
-        });
-      });
-      const email = await new Promise(resolve => {
-        cp.exec("git config user.email", (error, stdout, stderr) => {
-          resolve(stdout.trim());
-        });
-      });
+export function activate(context: ExtensionContext) {
+  logs.appendLine("Extension activation ...");
+  const workspaceRoot = (vs.workspace.workspaceFolders && (vs.workspace.workspaceFolders.length > 0))
+    ? vs.workspace.workspaceFolders[0].uri.fsPath : undefined;
 
-      if (name || email) {
-        snippet.appendText(` ${name} <${email}>`);
-      }
+  if (!workspaceRoot) {
+    console.log(workspace)
+    return;
+  }
 
-      const text = currentDocument.document.getText();
-      const foundVersion = text.match(/Version:(.*)/);
-      const foundRelease = text.match(/Release:(.*)/);
+  let promise = workspace.findFiles('mock.cfg');
+  promise.then((uri) => { if (uri.length > 0) { return mockBuildTaskProvider.mockFile = uri[0].path; } });
 
-      if (foundVersion && foundRelease) {
-        const macroRegex = /%{[^}]+}/g;
-        let version = foundVersion[1].trim();
-        let release = foundRelease[1].trim();
+  mockTaskProvider = tasks.registerTaskProvider(mockBuildTaskProvider.mockBuildScriptType, new mockBuildTaskProvider(workspaceRoot));
+  context.subscriptions.push(mockTaskProvider);
+  logs.appendLine("mockTaskProvider added ...");
 
-        // If macros are found evaluate
-        if (macroRegex.test(version) || macroRegex.test(release)) {
-          version = await new Promise(resolve => {
-            cp.exec(`rpm -E "${version}"`, (error, stdout, stderr) => {
-              resolve(stdout.trim());
-            });
-          });
-          release = await new Promise(resolve => {
-            cp.exec(`rpm -E ${release}`, (error, stdout, stderr) => {
-              resolve(stdout.trim());
-            });
-          });
-        }
+  runMockCommand = commands.registerCommand('rpmspecChangelog.runMock', quickInput, context);
+  context.subscriptions.push(runMockCommand);
+  logs.appendLine("runMockCommand added ...");
 
-        snippet.appendText(` - ${version}-${release}`);
-      }
+  insertChangelogCommand = commands.registerTextEditorCommand("rpmspecChangelog.insertRPMSpecChangelog", insertChangelog);
+  context.subscriptions.push(insertChangelogCommand);
+  logs.appendLine("insertChangelogCommand added ...");
 
-      snippet.appendText("\n- ");
-      snippet.appendTabstop();
-      snippet.appendText("\n");
-      currentDocument.insertSnippet(snippet);
-    }
-  );
-
-  context.subscriptions.push(disposable);
 }
+
+export function deactivate(): void {
+  if (runMockCommand) { runMockCommand.dispose(); }
+  if (insertChangelogCommand) { insertChangelogCommand.dispose(); }
+  if (mockTaskProvider) { mockTaskProvider.dispose(); }
+}
+
+

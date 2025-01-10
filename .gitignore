@@ -2,3 +2,7 @@ out
 node_modules
 .vscode-test/
 *.vsix
+extension/
+*Content_Types*
+.tokens
+!tests/
