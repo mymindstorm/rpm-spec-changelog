@@ -2,7 +2,7 @@
 	"name": "rpmspec-changelog",
 	"displayName": "RPMSpec Snippets and Mock build",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you. Can also run mock directly for one or many OS",
-	"version": "1.5.3",
+	"version": "1.5.1",
 	"publisher": "adadov",
 	"repository": {
 		"type": "https",
@@ -37,10 +37,10 @@
 				"command": "rpmspecChangelog.createArchive",
 				"title": "RPM: Create source archive from current"
 			}
-			
-			
-			
-			
+			// {
+			// 	"command": "rpmspecChangelog.createArchiveFrom",
+			// 	"title": "RPM: Create source archive from ..."
+			// }
 		],
 		"configurationDefaults": {},
 		"configuration": [
@@ -146,11 +146,11 @@
 			{
 				"type": "rpm",
 				"properties": {
-					
-					
-					
-					
-					
+					// "download": {
+					// 	"type": "boolean",
+					// 	"default": false,
+					// 	"description": "Download sources"
+					// },
 					"type": {
 						"type": "string",
 						"default": "rpm",
