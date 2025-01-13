@@ -2,7 +2,7 @@
 	"name": "rpmspec-changelog",
 	"displayName": "RPMSpec Snippets and Mock build",
 	"description": "Inserts a properly formatted changelog line to your RPM spec file for you. Can also run mock directly for one or many OS",
-	"version": "1.5.4",
+	"version": "1.5.5",
 	"publisher": "adadov",
 	"repository": {
 		"type": "https",
