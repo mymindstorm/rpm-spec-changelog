@@ -106,7 +106,7 @@ export class mockBuildTaskProvider implements TaskProvider {
       tmpMockfile = './tmpcfg-' + config + '.cfg';
       cmd += `cat $(mock -q -r ${config} --debug-config-expanded|awk '/config_file/ {print $3}'|tr -d "'") > ${tmpMockfile};`;
       cmd += `cat ${this.localMockFile} >> ${tmpMockfile};`;
-      specfile = `${this.workspaceRoot}/${this.specFile}`;
+      specfile = this.specFile;
     } else {
       tmpSpecfile = './tmpcfg-' + config + '.spec';
       cmd += `rpmautospec process-distgit ${this.specFile} ${tmpSpecfile};`;
